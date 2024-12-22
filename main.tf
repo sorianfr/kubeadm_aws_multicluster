@@ -217,6 +217,8 @@ module "kubernetes_clusters" {
   private_subnet_cidr_block = each.value.private_subnet_cidr_block
   controlplane_private_ip  = each.value.controlplane_private_ip
   pod_subnet               = each.value.pod_subnet
+  service_cidr             = each.value.service_cidr
+  
   worker_count             = each.value.worker_count
 
   # Pass the private key
