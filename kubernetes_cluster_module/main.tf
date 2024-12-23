@@ -228,26 +228,28 @@
     data "template_file" "kubeadm_config" {
       template = file("${path.module}/kubeadm-config.tpl")
       vars = {
+        cluster_name    = var.cluster_name
         controlplane_ip = var.controlplane_private_ip
         pod_subnet      = var.pod_subnet
       }
     }
 
     resource "local_file" "kubeadm_config" {
-      filename = "${path.module}/kubeadm-config.yaml"
+      filename = "${path.module}/kubeadm-config-${var.cluster_name}.yaml"
       content  = data.template_file.kubeadm_config.rendered
     }
 
     data "template_file" "custom_resources" {
       template = file("${path.module}/custom-resources.tpl")
       vars = {
+        cluster_name    = var.cluster_name
         pod_subnet    = var.pod_subnet
         encapsulation = var.encapsulation
       }
     }
 
     resource "local_file" "custom_resources" {
-      filename = "${path.module}/custom-resources.yaml"
+      filename = "${path.module}/custom-resources-${var.cluster_name}.yaml"
       content  = data.template_file.custom_resources.rendered
     }
 
