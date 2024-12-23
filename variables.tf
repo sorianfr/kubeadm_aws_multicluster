@@ -47,6 +47,7 @@ variable "clusters" {
     controlplane_private_ip = string
     pod_subnet              = string
     worker_count            = number
+    service_cidr            = string
 
   }))
 }
