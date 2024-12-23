@@ -157,7 +157,9 @@
         #!/bin/bash
         # Set hostname for the control plane node
         hostnamectl set-hostname ${var.controlplane_hostname}
-
+        # Install envsubst (gettext package)
+        sudo apt update
+        sudo apt install -y gettext
         # Download and execute the setup script
         curl -O https://raw.githubusercontent.com/sorianfr/kubeadm_multinode_cluster_vagrant/master/setup_k8s_ec2.sh
         chmod +x /setup_k8s_ec2.sh
