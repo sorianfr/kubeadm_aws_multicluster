@@ -1,9 +1,11 @@
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
+metadata:
+  name: "${cluster_name}"
 networking:
   podSubnet: "${pod_subnet}"  # Update to match your Tigera Calico CIDR
-  serviceSubnet: "10.96.0.0/16" # Default service subnet
+  serviceSubnet: "${service_cidr}" 
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
