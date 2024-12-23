@@ -253,6 +253,7 @@
       content  = data.template_file.custom_resources.rendered
     }
 
+
     resource "null_resource" "copy_files_to_bastion" {
       provisioner "local-exec" {
         command = <<-EOT
@@ -272,8 +273,8 @@
       provisioner "remote-exec" {
         inline = [
           "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no my_k8s_key.pem ubuntu@${var.controlplane_private_ip}:~/",
-          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no kubeadm-config.yaml ubuntu@${var.controlplane_private_ip}:~/",
-          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no custom-resources.yaml ubuntu@${var.controlplane_private_ip}:~/"
+          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no kubeadm-config-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/",
+          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no custom-resources-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/"
 
         ]
 
