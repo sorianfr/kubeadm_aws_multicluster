@@ -389,6 +389,9 @@
 
         # Apply networking
         "kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.29.0/manifests/tigera-operator.yaml",
+        # Wait for the CRDs to be registered
+        "echo 'Waiting for Calico CRDs to be registered...'",
+        "until kubectl get crd installations.operator.tigera.io >/dev/null 2>&1; do echo 'Waiting for CRD...'; sleep 5; done",
         "kubectl apply -f custom-resources-${var.cluster_name}.yaml"
       ],
       [
