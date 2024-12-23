@@ -231,6 +231,8 @@
         cluster_name    = var.cluster_name
         controlplane_ip = var.controlplane_private_ip
         pod_subnet      = var.pod_subnet
+        service_cidr      = var.service_cidr
+
       }
     }
 
