@@ -368,7 +368,13 @@
     resource "null_resource" "kubeadm_init" {
   provisioner "remote-exec" {
     inline = concat(
-      [
+      [ # Copy .tpl files to the control plane
+        "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no kubeadm-config.tpl custom-resources.tpl ubuntu@${var.controlplane_private_ip}:~/",
+
+        # Render templates on the control plane
+        "ssh -i my_k8s_key.pem -o StrictHostKeyChecking=no ubuntu@${var.controlplane_private_ip} 'envsubst < kubeadm-config.tpl > kubeadm-config.yaml'",
+        "ssh -i my_k8s_key.pem -o StrictHostKeyChecking=no ubuntu@${var.controlplane_private_ip} 'envsubst < custom-resources.tpl > custom-resources.yaml'",
+
         # Initialize the control plane
         "sudo kubeadm init --pod-network-cidr=${var.pod_subnet} --service-cidr=${var.service_cidr} --apiserver-advertise-address=${var.controlplane_private_ip} --apiserver-bind-port=6443 --node-name=controlplane | tee /tmp/kubeadm_output.log",
 
