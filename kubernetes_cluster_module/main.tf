@@ -392,7 +392,15 @@
         # Wait for the CRDs to be registered
         "echo 'Waiting for Calico CRDs to be registered...'",
         "until kubectl get crd installations.operator.tigera.io >/dev/null 2>&1; do echo 'Waiting for CRD...'; sleep 5; done",
-        "kubectl apply -f custom-resources-${var.cluster_name}.yaml"
+        "kubectl apply -f custom-resources-${var.cluster_name}.yaml",
+
+        # Install Calicoctl tool
+        "wget https://github.com/projectcalico/calico/releases/download/v3.29.0/calicoctl-linux-amd64",
+        "chmod +x ./calicoctl-linux-amd64",
+        "sudo mv calicoctl-linux-amd64 /usr/local/bin/calicoctl",
+
+        # Install k9s
+        "wget https://github.com/derailed/k9s/releases/download/v0.32.7/k9s_linux_amd64.deb && sudo apt install ./k9s_linux_amd64.deb && rm k9s_linux_amd64.deb"
       ],
       [
         for worker_ip in aws_instance.workers[*].private_ip :
