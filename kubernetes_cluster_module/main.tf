@@ -153,10 +153,11 @@
 
     # User Data for Kubernetes setup on the Control Plane
     data "template_file" "controlplane_user_data" {
+      count    = length(var.clusters)
       template = <<-EOF
         #!/bin/bash
         # Set hostname for the control plane node
-        hostnamectl set-hostname ${var.controlplane_hostname}
+        hostnamectl set-hostname ${var.clusters[count.index].cluster_name}-controlplane
         # Install envsubst (gettext package)
         sudo apt update
         sudo apt install -y gettext
@@ -169,12 +170,16 @@
 
     # User Data for Workers
     data "template_file" "worker_user_data" {
-      count    = var.worker_count
+      count    = length(var.clusters) * var.worker_count
       template = <<-EOF
         #!/bin/bash
-        # Set hostname for worker${count.index + 1}
-        hostnamectl set-hostname worker${count.index + 1}
-
+        # Calculate cluster index and worker index
+        cluster_index=${count.index / var.worker_count}
+        worker_index=${count.index % var.worker_count}
+        
+        # Set hostname for the worker node
+        hostnamectl set-hostname ${var.clusters[cluster_index].cluster_name}-worker${worker_index + 1}
+    
         # Download and execute the setup script
         curl -O https://raw.githubusercontent.com/sorianfr/kubeadm_multinode_cluster_vagrant/master/setup_k8s_ec2.sh
         chmod +x /setup_k8s_ec2.sh
@@ -309,8 +314,8 @@
           # Update /etc/hosts on all instances
           for ip in ${aws_instance.controlplane.private_ip} ${join(" ", aws_instance.workers[*].private_ip)}; do
             ssh -i "my_k8s_key.pem" -o StrictHostKeyChecking=no -o ProxyCommand="ssh -i my_k8s_key.pem -W %h:%p ubuntu@${var.bastion_public_dns}" ubuntu@$ip \
-            "echo '${aws_instance.controlplane.private_ip} controlplane' | sudo tee -a /etc/hosts && \
-            ${join("\n", aws_instance.workers[*].private_ip)} | awk '{print $1 \" worker\" NR}' | sudo tee -a /etc/hosts"
+            "echo -e '${join("\n", var.clusters[*].controlplane_private_ip)}' | awk -v hostname_suffix='-controlplane' '{print $1 \" \" $2 hostname_suffix}' | sudo tee -a /etc/hosts && \
+             ${join("\n", flatten([for cluster in var.clusters : cluster.worker_ips]))} | awk '{print $1 \" \" $2 \" worker\" NR}' | sudo tee -a /etc/hosts"
           done
         EOT
       }
