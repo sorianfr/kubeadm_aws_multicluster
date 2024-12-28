@@ -132,9 +132,11 @@ variable "copy_files_to_bastion" {
 variable "clusters" {
   description = "List of all clusters for updating /etc/hosts across nodes"
   type = list(object({
-    cluster_name             = string
+    cluster_name        = string
     private_subnet_cidr_block = string
-    controlplane_private_ip  = string
-    worker_count             = number
+    controlplane_private_ip = string
+    pod_subnet              = string
+    worker_count            = number
+    service_cidr            = string
   }))
 }
