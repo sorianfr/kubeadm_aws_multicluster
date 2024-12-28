@@ -156,7 +156,7 @@
           template = <<-EOF
             #!/bin/bash
             # Set hostname for the control plane node
-            hostnamectl set-hostname ${var.cluster_name}_${var.controlplane_hostname}
+            hostnamectl set-hostname ${var.cluster_name}_controlplane
         
             # Download and execute the setup script
             curl -O https://raw.githubusercontent.com/sorianfr/kubeadm_multinode_cluster_vagrant/master/setup_k8s_ec2.sh
@@ -172,7 +172,7 @@
       template = <<-EOF
         #!/bin/bash
         # Set hostname for worker${count.index + 1}
-        hostnamectl set-hostname worker${count.index + 1}
+        hostnamectl set-hostname ${var.cluster_name}_worker${count.index + 1}
 
         # Download and execute the setup script
         curl -O https://raw.githubusercontent.com/sorianfr/kubeadm_multinode_cluster_vagrant/master/setup_k8s_ec2.sh
@@ -294,27 +294,27 @@
 
 
 
-    # Define the local-exec provisioner for each instance to update /etc/hosts
-    resource "null_resource" "update_hosts" {
-      for_each = { for cluster in var.clusters : cluster.cluster_name => cluster }
-    
-      provisioner "local-exec" {
-        command = <<-EOT
-          # Compute control plane and worker IPs for all clusters
-          CONTROL_PLANE_IPS="${join("\n", [for cluster in var.clusters : "${cluster.controlplane_private_ip} ${cluster.cluster_name}-controlplane"])}"
-          WORKER_IPS="${join("\n", flatten([for cluster in var.clusters : [for i in range(0, cluster.worker_count) : "${cidrhost(cluster.private_subnet_cidr_block, 11 + i)} ${cluster.cluster_name}-worker${i + 1}"]]))}"
-    
-          # Combine all IPs
-          HOSTS_ENTRIES="$CONTROL_PLANE_IPS\n$WORKER_IPS"
-    
-          # Update /etc/hosts on all nodes in this cluster
-          for ip in ${each.value.controlplane_private_ip} ${join(" ", [for i in range(0, each.value.worker_count) : cidrhost(each.value.private_subnet_cidr_block, 11 + i)])}; do
-            ssh -i "my_k8s_key.pem" -o StrictHostKeyChecking=no ubuntu@$ip \
-            "echo -e \"$HOSTS_ENTRIES\" | sudo tee -a /etc/hosts"
-          done
-        EOT
-      }
-    }
+        # Define the local-exec provisioner for each instance to update /etc/hosts
+        resource "null_resource" "update_hosts" {
+          for_each = { for cluster in var.clusters : cluster.cluster_name => cluster }
+        
+          provisioner "local-exec" {
+            command = <<-EOT
+              # Compute control plane and worker IPs for all clusters
+              CONTROL_PLANE_IPS="${join("\n", [for cluster in var.clusters : "${cluster.controlplane_private_ip} ${cluster.cluster_name}-controlplane"])}"
+              WORKER_IPS="${join("\n", flatten([for cluster in var.clusters : [for i in range(0, cluster.worker_count) : "${cidrhost(cluster.private_subnet_cidr_block, 11 + i)} ${cluster.cluster_name}-worker${i + 1}"]]))}"
+        
+              # Combine all IPs
+              HOSTS_ENTRIES="$CONTROL_PLANE_IPS\n$WORKER_IPS"
+        
+              # Update /etc/hosts on all nodes in this cluster
+              for ip in ${each.value.controlplane_private_ip} ${join(" ", [for i in range(0, each.value.worker_count) : cidrhost(each.value.private_subnet_cidr_block, 11 + i)])}; do
+                ssh -i "my_k8s_key.pem" -o StrictHostKeyChecking=no ubuntu@$ip \
+                "echo -e \"$HOSTS_ENTRIES\" | sudo tee -a /etc/hosts"
+              done
+            EOT
+          }
+        }
 
 
 
