@@ -153,11 +153,10 @@
 
     # User Data for Kubernetes setup on the Control Plane
     data "template_file" "controlplane_user_data" {
-      count    = length(var.clusters)
       template = <<-EOF
         #!/bin/bash
         # Set hostname for the control plane node
-        hostnamectl set-hostname ${var.clusters[count.index].cluster_name}-controlplane
+        hostnamectl set-hostname ${each.value.cluster_name}-controlplane
         # Install envsubst (gettext package)
         sudo apt update
         sudo apt install -y gettext
@@ -170,15 +169,11 @@
 
     # User Data for Workers
     data "template_file" "worker_user_data" {
-      count    = length(var.clusters) * var.worker_count
+      count    = each.value.worker_count
       template = <<-EOF
         #!/bin/bash
-        # Calculate cluster index and worker index
-        cluster_index=${count.index / var.worker_count}
-        worker_index=${count.index % var.worker_count}
-        
-        # Set hostname for the worker node
-        hostnamectl set-hostname ${var.clusters[cluster_index].cluster_name}-worker${worker_index + 1}
+        # Set hostname for worker${count.index + 1}
+        hostnamectl set-hostname ${each.value.cluster_name}-worker${count.index + 1}
     
         # Download and execute the setup script
         curl -O https://raw.githubusercontent.com/sorianfr/kubeadm_multinode_cluster_vagrant/master/setup_k8s_ec2.sh
@@ -309,19 +304,22 @@
     
       provisioner "local-exec" {
         command = <<-EOT
-          # Dynamically compute control plane and worker IPs for all clusters
-          ALL_CONTROL_PLANES="${join(" ", [for cluster in var.clusters : cluster.controlplane_private_ip])}"
-          ALL_WORKERS="${join(" ", flatten([for cluster in var.clusters : [for i in range(0, cluster.worker_count) : cidrhost(cluster.private_subnet_cidr_block, 11 + i)]]))}"
+          # Build /etc/hosts entries for all clusters
+          HOSTS_ENTRIES=$(
+            echo "${join("\n", [for cluster in var.clusters :
+              "${cluster.controlplane_private_ip} ${cluster.cluster_name}-controlplane"
+            ])}" && \
+            echo "${join("\n", flatten([for cluster in var.clusters :
+              [for i in range(0, cluster.worker_count) :
+                "${cidrhost(cluster.private_subnet_cidr_block, 11 + i)} ${cluster.cluster_name}-worker${i + 1}"
+              ]
+            ]))}"
+          )
     
-          # Combine all nodes' IPs
-          ALL_NODES="$ALL_CONTROL_PLANES $ALL_WORKERS"
-    
-          # Update /etc/hosts on all nodes
+          # Apply hosts entries to all nodes in this cluster
           for ip in ${aws_instance.controlplane.private_ip} ${join(" ", aws_instance.workers[*].private_ip)}; do
-            ssh -i "my_k8s_key.pem" -o StrictHostKeyChecking=no ubuntu@$ip <<EOF
-    echo "${join("\n", [for cluster in var.clusters : "${cluster.controlplane_private_ip} ${cluster.cluster_name}-controlplane"])}" | sudo tee -a /etc/hosts
-    echo "${join("\n", flatten([for cluster in var.clusters : [for i in range(0, cluster.worker_count) : "${cidrhost(cluster.private_subnet_cidr_block, 11 + i)} ${cluster.cluster_name}-worker${i + 1}"]]))}" | sudo tee -a /etc/hosts
-    EOF
+            ssh -i "my_k8s_key.pem" -o StrictHostKeyChecking=no ubuntu@$ip \
+            "echo \"$HOSTS_ENTRIES\" | sudo tee -a /etc/hosts"
           done
         EOT
       }
