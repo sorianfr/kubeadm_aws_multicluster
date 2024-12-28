@@ -294,27 +294,34 @@
 
 
 
-        # Define the local-exec provisioner for each instance to update /etc/hosts
-        resource "null_resource" "update_hosts" {
-          for_each = { for cluster in var.clusters : cluster.cluster_name => cluster }
-        
-          provisioner "local-exec" {
-            command = <<-EOT
-              # Compute control plane and worker IPs for all clusters
-              CONTROL_PLANE_IPS="${join("\n", [for cluster in var.clusters : "${cluster.controlplane_private_ip} ${cluster.cluster_name}-controlplane"])}"
-              WORKER_IPS="${join("\n", flatten([for cluster in var.clusters : [for i in range(0, cluster.worker_count) : "${cidrhost(cluster.private_subnet_cidr_block, 11 + i)} ${cluster.cluster_name}-worker${i + 1}"]]))}"
-        
-              # Combine all IPs
-              HOSTS_ENTRIES="$CONTROL_PLANE_IPS\n$WORKER_IPS"
-        
-              # Update /etc/hosts on all nodes in this cluster
-              for ip in ${each.value.controlplane_private_ip} ${join(" ", [for i in range(0, each.value.worker_count) : cidrhost(each.value.private_subnet_cidr_block, 11 + i)])}; do
-                ssh -i "my_k8s_key.pem" -o StrictHostKeyChecking=no ubuntu@$ip \
-                "echo -e \"$HOSTS_ENTRIES\" | sudo tee -a /etc/hosts"
-              done
-            EOT
-          }
-        }
+    # Define the local-exec provisioner for each instance to update /etc/hosts
+    resource "null_resource" "update_hosts" {
+      depends_on = [
+        null_resource.copy_files_to_bastion,
+        aws_instance.controlplane,
+        aws_instance.workers,
+        null_resource.wait_for_controlplane_setup,
+        null_resource.wait_for_workers_setup
+      ]
+    
+      provisioner "local-exec" {
+        command = <<-EOT
+          # Generate /etc/hosts entries for all clusters
+          HOSTS_ENTRIES="${join("\n", flatten([
+            for cluster_name, cluster in local.cluster_details : [
+              "${cluster.control_plane.ip} ${cluster.control_plane.hostname}",
+              join("\n", [for worker in cluster.workers : "${worker.ip} ${worker.hostname}"])
+            ]
+          ]))}"
+    
+          # Update /etc/hosts on all nodes in the current cluster
+          for ip in ${aws_instance.controlplane.private_ip} ${join(" ", aws_instance.workers[*].private_ip)}; do
+            ssh -i "my_k8s_key.pem" -o StrictHostKeyChecking=no -o ProxyCommand="ssh -i my_k8s_key.pem -W %h:%p ubuntu@${var.bastion_public_dns}" ubuntu@$ip \
+            "echo -e \"$HOSTS_ENTRIES\" | sudo tee -a /etc/hosts"
+          done
+        EOT
+      }
+    }
 
 
 
