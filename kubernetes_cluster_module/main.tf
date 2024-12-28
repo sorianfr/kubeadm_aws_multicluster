@@ -153,12 +153,12 @@
 
     # User Data for Kubernetes setup on the Control Plane
     data "template_file" "controlplane_user_data" {
-      for_each = toset(keys(var.clusters)) # Iterate over each cluster
+      for_each = { for cluster in var.clusters : cluster.cluster_name => cluster }
     
       template = <<-EOF
         #!/bin/bash
         # Set hostname for the control plane node
-        hostnamectl set-hostname ${var.clusters[each.key].cluster_name}-controlplane
+        hostnamectl set-hostname ${each.value.cluster_name}-controlplane
         # Install envsubst (gettext package)
         sudo apt update
         sudo apt install -y gettext
@@ -299,35 +299,27 @@
 
 
     # Define the local-exec provisioner for each instance to update /etc/hosts
-
     resource "null_resource" "update_hosts" {
-      depends_on = [
-        aws_instance.controlplane,
-        aws_instance.workers,
-      ]
+      for_each = { for cluster in var.clusters : cluster.cluster_name => cluster }
     
       provisioner "local-exec" {
         command = <<-EOT
-          # Build /etc/hosts entries for all clusters
-          HOSTS_ENTRIES=$(
-            echo "${join("\n", [for cluster in var.clusters :
-              "${cluster.controlplane_private_ip} ${cluster.cluster_name}-controlplane"
-            ])}" && \
-            echo "${join("\n", flatten([for cluster in var.clusters :
-              [for i in range(0, cluster.worker_count) :
-                "${cidrhost(cluster.private_subnet_cidr_block, 11 + i)} ${cluster.cluster_name}-worker${i + 1}"
-              ]
-            ]))}"
-          )
+          # Compute control plane and worker IPs for all clusters
+          CONTROL_PLANE_IPS="${join("\n", [for cluster in var.clusters : "${cluster.controlplane_private_ip} ${cluster.cluster_name}-controlplane"])}"
+          WORKER_IPS="${join("\n", flatten([for cluster in var.clusters : [for i in range(0, cluster.worker_count) : "${cidrhost(cluster.private_subnet_cidr_block, 11 + i)} ${cluster.cluster_name}-worker${i + 1}"]]))}"
     
-          # Apply hosts entries to all nodes in this cluster
-          for ip in ${aws_instance.controlplane.private_ip} ${join(" ", aws_instance.workers[*].private_ip)}; do
+          # Combine all IPs
+          HOSTS_ENTRIES="$CONTROL_PLANE_IPS\n$WORKER_IPS"
+    
+          # Update /etc/hosts on all nodes in this cluster
+          for ip in ${each.value.controlplane_private_ip} ${join(" ", [for i in range(0, each.value.worker_count) : cidrhost(each.value.private_subnet_cidr_block, 11 + i)])}; do
             ssh -i "my_k8s_key.pem" -o StrictHostKeyChecking=no ubuntu@$ip \
-            "echo \"$HOSTS_ENTRIES\" | sudo tee -a /etc/hosts"
+            "echo -e \"$HOSTS_ENTRIES\" | sudo tee -a /etc/hosts"
           done
         EOT
       }
     }
+
 
 
 
