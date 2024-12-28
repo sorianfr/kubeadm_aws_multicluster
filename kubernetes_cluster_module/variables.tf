@@ -128,7 +128,7 @@ variable "clusters" {
   }))
 }
 
-variable "cluster_ips" {
+variable "cluster_details" {
   description = "Preprocessed cluster IPs and hostnames for all clusters"
   type = map(object({
     control_plane = object({
