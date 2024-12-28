@@ -193,7 +193,7 @@ module "kubernetes_clusters" {
   for_each = { for cluster in var.clusters : cluster.cluster_name => cluster }
 
   # Shared attributes
-
+  clusters                 = var.clusters  # Pass all clusters to the module
   vpc_id                   = aws_vpc.main_vpc.id  # Pass the VPC ID
   vpc_cidr_block           = var.vpc_cidr_block           # Pass VPC CIDR block
   ami_id                   = var.ami_id                   # Pass AMI ID
