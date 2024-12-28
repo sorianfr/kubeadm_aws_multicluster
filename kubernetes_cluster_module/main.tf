@@ -152,41 +152,28 @@
     
 
     # User Data for Kubernetes setup on the Control Plane
-    data "template_file" "controlplane_user_data" {
-      for_each = var.cluster_ips
-    
-      template = <<-EOF
-        #!/bin/bash
-        # Set hostname for the control plane node
-        hostnamectl set-hostname ${each.value.control_plane.hostname}
-        # Install envsubst (gettext package)
-        sudo apt update
-        sudo apt install -y gettext
-        # Download and execute the setup script
-        curl -O https://raw.githubusercontent.com/sorianfr/kubeadm_multinode_cluster_vagrant/master/setup_k8s_ec2.sh
-        chmod +x /setup_k8s_ec2.sh
-        /setup_k8s_ec2.sh
-      EOF
-    }
+        data "template_file" "controlplane_user_data" {
+          template = <<-EOF
+            #!/bin/bash
+            # Set hostname for the control plane node
+            hostnamectl set-hostname ${var.cluster_name}_${var.controlplane_hostname}
+        
+            # Download and execute the setup script
+            curl -O https://raw.githubusercontent.com/sorianfr/kubeadm_multinode_cluster_vagrant/master/setup_k8s_ec2.sh
+            chmod +x /setup_k8s_ec2.sh
+            /setup_k8s_ec2.sh
+          EOF
+        }
 
 
-    # User Data for Workers
+    # User Data for Workers  
     data "template_file" "worker_user_data" {
-      for_each = flatten([
-        for cluster_name, cluster_data in var.cluster_ips : [
-          for worker in cluster_data.workers : {
-            cluster_name = cluster_name
-            ip           = worker.ip
-            hostname     = worker.hostname
-          }
-        ]
-      ])
-    
+      count    = var.worker_count
       template = <<-EOF
         #!/bin/bash
-        # Set hostname for the worker node
-        hostnamectl set-hostname ${each.value.hostname}
-    
+        # Set hostname for worker${count.index + 1}
+        hostnamectl set-hostname worker${count.index + 1}
+
         # Download and execute the setup script
         curl -O https://raw.githubusercontent.com/sorianfr/kubeadm_multinode_cluster_vagrant/master/setup_k8s_ec2.sh
         chmod +x /setup_k8s_ec2.sh
