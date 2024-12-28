@@ -2,6 +2,25 @@ provider "aws" {
   region = var.region
 }
 
+# Preprocess the IPs and hostnames for each cluster
+locals {
+  cluster_details = {
+    for cluster in var.clusters :
+    cluster.cluster_name => {
+      control_plane = {
+        ip       = cluster.controlplane_private_ip
+        hostname = "${cluster.cluster_name}-controlplane"
+      }
+      workers = [
+        for i in range(0, cluster.worker_count) : {
+          ip       = cidrhost(cluster.private_subnet_cidr_block, 11 + i)
+          hostname = "${cluster.cluster_name}-worker${i + 1}"
+        }
+      ]
+    }
+  }
+}
+
 # Generate a TLS private key
 resource "tls_private_key" "k8s_key_pair" {
   algorithm = "RSA"
@@ -194,6 +213,7 @@ module "kubernetes_clusters" {
 
   # Shared attributes
   clusters                 = var.clusters  # Pass all clusters to the module
+  cluster_ips              = local.cluster_details # Pass the preprocessed cluster IPs and hostnames
   vpc_id                   = aws_vpc.main_vpc.id  # Pass the VPC ID
   vpc_cidr_block           = var.vpc_cidr_block           # Pass VPC CIDR block
   ami_id                   = var.ami_id                   # Pass AMI ID
