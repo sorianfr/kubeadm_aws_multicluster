@@ -153,12 +153,12 @@
 
     # User Data for Kubernetes setup on the Control Plane
     data "template_file" "controlplane_user_data" {
-      for_each = { for cluster in var.clusters : cluster.cluster_name => cluster }
+      for_each = var.cluster_ips
     
       template = <<-EOF
         #!/bin/bash
         # Set hostname for the control plane node
-        hostnamectl set-hostname ${each.value.cluster_name}-controlplane
+        hostnamectl set-hostname ${each.value.control_plane.hostname}
         # Install envsubst (gettext package)
         sudo apt update
         sudo apt install -y gettext
@@ -169,23 +169,23 @@
       EOF
     }
 
+
     # User Data for Workers
     data "template_file" "worker_user_data" {
-      for_each = {
-        for cluster in var.clusters :
-        # Generate a unique key for each worker node (e.g., cluster_name-worker_index)
-        for worker_index in range(0, cluster.worker_count) :
-        "${cluster.cluster_name}-worker${worker_index}" => {
-          cluster_name             = cluster.cluster_name
-          worker_index             = worker_index
-          private_subnet_cidr_block = cluster.private_subnet_cidr_block
-        }
-      }
+      for_each = flatten([
+        for cluster_name, cluster_data in var.cluster_ips : [
+          for worker in cluster_data.workers : {
+            cluster_name = cluster_name
+            ip           = worker.ip
+            hostname     = worker.hostname
+          }
+        ]
+      ])
     
       template = <<-EOF
         #!/bin/bash
         # Set hostname for the worker node
-        hostnamectl set-hostname ${each.value.cluster_name}-worker${each.value.worker_index + 1}
+        hostnamectl set-hostname ${each.value.hostname}
     
         # Download and execute the setup script
         curl -O https://raw.githubusercontent.com/sorianfr/kubeadm_multinode_cluster_vagrant/master/setup_k8s_ec2.sh
@@ -193,6 +193,7 @@
         /setup_k8s_ec2.sh
       EOF
     }
+
 
 
     # Control Plane Instance
