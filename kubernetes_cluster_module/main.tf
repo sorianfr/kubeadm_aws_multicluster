@@ -308,7 +308,7 @@
         command = <<-EOT
           # Generate /etc/hosts entries for all clusters
           HOSTS_ENTRIES="${join("\n", flatten([
-            for cluster_name, cluster in local.cluster_details : [
+            for cluster_name, cluster in var.cluster_details : [
               "${cluster.control_plane.ip} ${cluster.control_plane.hostname}",
               join("\n", [for worker in cluster.workers : "${worker.ip} ${worker.hostname}"])
             ]
@@ -322,6 +322,7 @@
         EOT
       }
     }
+
 
 
 
