@@ -88,19 +88,6 @@ variable "private_route_table_id" {
   type        = string
 }
 
-variable "controlplane_hostname" {
-  default = "controlplane"
-}
-
-variable "worker1_hostname" {
-  default = "worker1"
-}
-
-variable "worker2_hostname" {
-  default = "worker2"
-}
-
-
 variable "iam_instance_profile" {
   description = "IAM instance profile for EC2 instances"
   type        = string
