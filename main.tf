@@ -9,12 +9,12 @@ locals {
     cluster.cluster_name => {
       control_plane = {
         ip       = cluster.controlplane_private_ip
-        hostname = "${cluster.cluster_name}-controlplane"
+        hostname = "${cluster.cluster_name}_controlplane"
       }
       workers = [
         for i in range(0, cluster.worker_count) : {
           ip       = cidrhost(cluster.private_subnet_cidr_block, 11 + i)
-          hostname = "${cluster.cluster_name}-worker${i + 1}"
+          hostname = "${cluster.cluster_name}_worker${i + 1}"
         }
       ]
     }
