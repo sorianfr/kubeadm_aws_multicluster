@@ -171,14 +171,21 @@
 
     # User Data for Workers
     data "template_file" "worker_user_data" {
-      for_each = { for cluster_name, cluster in var.clusters : cluster_name => cluster }
-    
-      count = each.value.worker_count
+      for_each = {
+        for cluster in var.clusters :
+        # Generate a unique key for each worker node (e.g., cluster_name-worker_index)
+        for worker_index in range(0, cluster.worker_count) :
+        "${cluster.cluster_name}-worker${worker_index}" => {
+          cluster_name             = cluster.cluster_name
+          worker_index             = worker_index
+          private_subnet_cidr_block = cluster.private_subnet_cidr_block
+        }
+      }
     
       template = <<-EOF
         #!/bin/bash
-        # Set hostname for worker${count.index + 1}
-        hostnamectl set-hostname ${each.key}-worker${count.index + 1}
+        # Set hostname for the worker node
+        hostnamectl set-hostname ${each.value.cluster_name}-worker${each.value.worker_index + 1}
     
         # Download and execute the setup script
         curl -O https://raw.githubusercontent.com/sorianfr/kubeadm_multinode_cluster_vagrant/master/setup_k8s_ec2.sh
@@ -186,6 +193,7 @@
         /setup_k8s_ec2.sh
       EOF
     }
+
 
     # Control Plane Instance
     resource "aws_instance" "controlplane" {
