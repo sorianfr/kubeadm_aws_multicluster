@@ -140,3 +140,17 @@ variable "clusters" {
     service_cidr            = string
   }))
 }
+
+variable "cluster_ips" {
+  description = "Preprocessed cluster IPs and hostnames for all clusters"
+  type = map(object({
+    control_plane = object({
+      ip       = string
+      hostname = string
+    })
+    workers = list(object({
+      ip       = string
+      hostname = string
+    }))
+  }))
+}
