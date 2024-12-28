@@ -302,20 +302,25 @@
     # Define the local-exec provisioner for each instance to update /etc/hosts
     resource "null_resource" "update_hosts" {
       depends_on = [
-        null_resource.copy_files_to_bastion,
         aws_instance.controlplane,
         aws_instance.workers,
-        null_resource.wait_for_controlplane_setup,
-        null_resource.wait_for_workers_setup
       ]
-
+    
       provisioner "local-exec" {
         command = <<-EOT
-          # Update /etc/hosts on all instances
+          # Dynamically compute all control plane IPs
+          ALL_CONTROL_PLANES_IPS="${join(" ", [for cluster in var.clusters : cluster.controlplane_private_ip])}"
+    
+          # Dynamically compute all worker IPs
+          ALL_WORKERS_IPS="${join(" ", flatten([for cluster in var.clusters : [for i in range(cluster.worker_count) : cidrhost(cluster.private_subnet_cidr_block, 11 + i)]]))}"
+    
+          # Combine all IPs
+          ALL_NODES_IPS="$ALL_CONTROL_PLANES_IPS $ALL_WORKERS_IPS"
+    
+          # Update /etc/hosts on all nodes
           for ip in ${aws_instance.controlplane.private_ip} ${join(" ", aws_instance.workers[*].private_ip)}; do
-            ssh -i "my_k8s_key.pem" -o StrictHostKeyChecking=no -o ProxyCommand="ssh -i my_k8s_key.pem -W %h:%p ubuntu@${var.bastion_public_dns}" ubuntu@$ip \
-            "echo -e '${join("\n", var.clusters[*].controlplane_private_ip)}' | awk -v hostname_suffix='-controlplane' '{print $1 \" \" $2 hostname_suffix}' | sudo tee -a /etc/hosts && \
-             ${join("\n", flatten([for cluster in var.clusters : cluster.worker_ips]))} | awk '{print $1 \" \" $2 \" worker\" NR}' | sudo tee -a /etc/hosts"
+            ssh -i "my_k8s_key.pem" -o StrictHostKeyChecking=no ubuntu@$ip \
+            "echo -e '${join("\n", flatten([for cluster in var.clusters : cidrhost(cluster.private_subnet_cidr_block, 11)])} controlplane\n${join("\n", [for i, ip in range(11, 11 + cluster.worker_count) : ip worker${i}])}' | sudo tee -a /etc/hosts"
           done
         EOT
       }
