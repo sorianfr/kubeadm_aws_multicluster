@@ -128,3 +128,13 @@ variable "copy_files_to_bastion" {
     "my_k8s_key.pem"
   ]
 }
+
+variable "clusters" {
+  description = "List of all clusters for updating /etc/hosts across nodes"
+  type = list(object({
+    cluster_name             = string
+    private_subnet_cidr_block = string
+    controlplane_private_ip  = string
+    worker_count             = number
+  }))
+}
