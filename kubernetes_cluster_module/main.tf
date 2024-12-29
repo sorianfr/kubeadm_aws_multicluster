@@ -156,7 +156,7 @@
           template = <<-EOF
             #!/bin/bash
             # Set hostname for the control plane node
-            hostnamectl set-hostname ${var.cluster_name}_controlplane
+            hostnamectl set-hostname ${var.cluster_name}controlplane
         
             # Download and execute the setup script
             curl -O https://raw.githubusercontent.com/sorianfr/kubeadm_multinode_cluster_vagrant/master/setup_k8s_ec2.sh
@@ -172,7 +172,7 @@
       template = <<-EOF
         #!/bin/bash
         # Set hostname for worker${count.index + 1}
-        hostnamectl set-hostname ${var.cluster_name}_worker${count.index + 1}
+        hostnamectl set-hostname ${var.cluster_name}worker${count.index + 1}
 
         # Download and execute the setup script
         curl -O https://raw.githubusercontent.com/sorianfr/kubeadm_multinode_cluster_vagrant/master/setup_k8s_ec2.sh
