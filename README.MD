@@ -198,3 +198,13 @@ spec:
   }
   EOF
   )"
+  ```
+
+```bash
+kubectl run tmp-shell --rm -i --tty --image nicolaka/netshoot   
+```
+
+ 
+```bash
+kubectl rollout restart -n kube-system deployment/coredns 
+```
