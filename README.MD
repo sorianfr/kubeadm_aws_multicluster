@@ -152,7 +152,7 @@ metadata:
 spec: 
   cidr: 10.96.0.0/16 
   ipipMode: CrossSubnet 
-  disabled: true 
+  disabled: false
 ---  
 apiVersion: crd.projectcalico.org/v1 
 kind: IPPool 
@@ -161,7 +161,7 @@ metadata:
 spec: 
   cidr: 10.244.0.0/16 
   ipipMode: CrossSubnet 
-  disabled: true 
+  disabled: false 
 ```
 
 ## FelixConfiguration
