@@ -1,7 +1,7 @@
 ## FelixConfiguration
 
-
 1. Copy & Paste
+
   ```bash
   kubectl patch felixconfiguration default --type='merge' -p "$(cat <<EOF
   {
@@ -14,6 +14,7 @@
   }
   EOF
   )"
+```
 
 2. Copy & Paste
 
