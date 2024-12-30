@@ -6,4 +6,4 @@ spec:
   logSeverityScreen: Info 
   asNumber: 65001 
   serviceClusterIPs: 
-    - cidr: 10.96.0.0/16 
+    - cidr: "${service_cidr}"
