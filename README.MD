@@ -1,3 +1,31 @@
+## BGP Configuration
+
+1. Cluster1
+```bash
+apiVersion: projectcalico.org/v3
+kind: BGPConfiguration
+metadata:
+  name: default
+spec:
+  logSeverityScreen: Info
+  asNumber: 65001
+  serviceClusterIPs:
+    - cidr: 10.96.0.0/16
+```
+2. Cluster2
+```bash
+apiVersion: projectcalico.org/v3
+kind: BGPConfiguration
+metadata:
+  name: default
+spec:
+  logSeverityScreen: Info
+  asNumber: 65002
+  serviceClusterIPs:
+    - cidr: 10.100.0.0/16
+```
+
+
 ## FelixConfiguration
 
 1. Copy & Paste
