@@ -116,25 +116,25 @@ spec:
 apiVersion: projectcalico.org/v3
 kind: CalicoNodeStatus
 metadata:
-  name: c1-control-plane-status
+  name: c2-control-plane-status
 spec:
   classes:
     - Agent
     - BGP
     - Routes
-  node: cluster1controlplane
+  node: cluster2controlplane
   updatePeriodSeconds: 10
 ---
 apiVersion: projectcalico.org/v3
 kind: CalicoNodeStatus
 metadata:
-  name: c1-worker-status
+  name: c2-worker-status
 spec:
   classes:
     - Agent
     - BGP
     - Routes
-  node: cluster1worker1
+  node: cluster2worker1
   updatePeriodSeconds: 10
 ```
 ## IPPools
