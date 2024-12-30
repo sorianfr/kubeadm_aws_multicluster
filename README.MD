@@ -1,15 +1,16 @@
-  ```bash
-kubectl patch felixconfiguration default --type='merge' -p "$(cat <<EOF
-{
-  "spec": {
-    "externalNodesList": [
-      "$(nslookup cluster1controlplane | grep Address | tail -n 1 | awk '{print $2}')/32",
-      "$(nslookup cluster1worker1 | grep Address | tail -n 1 | awk '{print $2}')/32"
-    ]
+# FelixConfiguration
+```bash
+  kubectl patch felixconfiguration default --type='merge' -p "$(cat <<EOF
+  {
+    "spec": {
+      "externalNodesList": [
+        "$(nslookup cluster1controlplane | grep Address | tail -n 1 | awk '{print $2}')/32",
+        "$(nslookup cluster1worker1 | grep Address | tail -n 1 | awk '{print $2}')/32"
+      ]
+    }
   }
-}
-EOF
-)"
+  EOF
+  )"
 
 dfsfsfsdf
 
