@@ -391,7 +391,7 @@
   provisioner "remote-exec" {
     inline = concat(
       [ # Initialize the control plane
-        "sudo kubeadm init --pod-network-cidr=${var.pod_subnet} --service-cidr=${var.service_cidr} --apiserver-advertise-address=${var.controlplane_private_ip} --apiserver-bind-port=6443 --node-name=${var.cluster_name}controlplane | tee /tmp/kubeadm_output.log",
+        "sudo kubeadm init --pod-network-cidr=${var.pod_subnet} --service-cidr=${var.service_cidr} --apiserver-advertise-address=${var.controlplane_private_ip} --apiserver-bind-port=6443 --domain=${var.cluster_name}.local --node-name=${var.cluster_name}controlplane | tee /tmp/kubeadm_output.log",
 
         # Save kubeconfig
         "mkdir -p $HOME/.kube",
