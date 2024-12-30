@@ -64,6 +64,63 @@ spec:
   asNumber: 65001 
 ```
 
+
+## Calico Node Status
+1. Cluster1
+```bash
+apiVersion: projectcalico.org/v3
+kind: CalicoNodeStatus
+metadata:
+  name: c1-control-plane-status
+spec:
+  classes:
+    - Agent
+    - BGP
+    - Routes
+  node: cluster1controlplane
+  updatePeriodSeconds: 10
+---
+apiVersion: projectcalico.org/v3
+kind: CalicoNodeStatus
+metadata:
+  name: c1-worker-status
+spec:
+  classes:
+    - Agent
+    - BGP
+    - Routes
+  node: cluster1worker1
+  updatePeriodSeconds: 10
+EOF
+```
+2. Cluster2
+```bash
+apiVersion: projectcalico.org/v3
+kind: CalicoNodeStatus
+metadata:
+  name: c1-control-plane-status
+spec:
+  classes:
+    - Agent
+    - BGP
+    - Routes
+  node: cluster1controlplane
+  updatePeriodSeconds: 10
+---
+apiVersion: projectcalico.org/v3
+kind: CalicoNodeStatus
+metadata:
+  name: c1-worker-status
+spec:
+  classes:
+    - Agent
+    - BGP
+    - Routes
+  node: cluster1worker1
+  updatePeriodSeconds: 10
+EOF
+```
+
 ## FelixConfiguration
 
 1. Copy & Paste
@@ -81,6 +138,7 @@ spec:
   EOF
   )"
 ```
+
 
 2. Copy & Paste
 
