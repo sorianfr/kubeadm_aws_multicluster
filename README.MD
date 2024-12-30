@@ -15,8 +15,7 @@
   EOF
   )"
 
-dfsfsfsdf
-
+2. Copy & Paste
 
 
 ```bash
