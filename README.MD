@@ -11,6 +11,7 @@ kubectl patch felixconfiguration default --type='merge' -p "$(cat <<EOF
 EOF
 )"
 
+dfsfsfsdf
 
 
 
