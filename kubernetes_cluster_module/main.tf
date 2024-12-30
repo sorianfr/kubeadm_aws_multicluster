@@ -392,7 +392,7 @@
     inline = concat(
       [ # Initialize the control plane
         # "sudo kubeadm init --pod-network-cidr=${var.pod_subnet} --service-cidr=${var.service_cidr} --apiserver-advertise-address=${var.controlplane_private_ip} --apiserver-bind-port=6443 --node-name=${var.cluster_name}controlplane | tee /tmp/kubeadm_output.log",
-        "sudo kubeadm init --config=kubeadm-config-${var.cluster_name}.yaml | tee /tmp/kubeadm_output.log"
+        "sudo kubeadm init --config=kubeadm-config-${var.cluster_name}.yaml | tee /tmp/kubeadm_output.log",
         # Save kubeconfig
         "mkdir -p $HOME/.kube",
         "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config",
