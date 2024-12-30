@@ -1,4 +1,4 @@
-```bash
+  ```bash
 kubectl patch felixconfiguration default --type='merge' -p "$(cat <<EOF
 {
   "spec": {
