@@ -6,7 +6,7 @@ metadata:
 networking:
   podSubnet: "${pod_subnet}"  # Update to match your Tigera Calico CIDR
   serviceSubnet: "${service_cidr}" 
-  dnsDomain: ${var.cluster_name}.local
+  dnsDomain: ${cluster_name}.local
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
