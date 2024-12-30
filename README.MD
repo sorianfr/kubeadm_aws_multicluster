@@ -2,7 +2,7 @@
 
 
 1. Copy & Paste
-```bash
+  ```bash
   kubectl patch felixconfiguration default --type='merge' -p "$(cat <<EOF
   {
     "spec": {
@@ -18,15 +18,15 @@
 2. Copy & Paste
 
 
-```bash
-kubectl patch felixconfiguration default --type='merge' -p "$(cat <<EOF
-{
-  "spec": {
-    "externalNodesList": [
-      "$(nslookup cluster2controlplane | grep Address | tail -n 1 | awk '{print $2}')/32",
-      "$(nslookup cluster2worker1 | grep Address | tail -n 1 | awk '{print $2}')/32"
-    ]
+  ```bash
+  kubectl patch felixconfiguration default --type='merge' -p "$(cat <<EOF
+  {
+    "spec": {
+      "externalNodesList": [
+        "$(nslookup cluster2controlplane | grep Address | tail -n 1 | awk '{print $2}')/32",
+        "$(nslookup cluster2worker1 | grep Address | tail -n 1 | awk '{print $2}')/32"
+      ]
+    }
   }
-}
-EOF
-)"
+  EOF
+  )"
