@@ -44,7 +44,7 @@ spec:
     - cidr: 10.100.0.0/16
 ```
 
-## BGP Configuration
+## BGP Peers
 
 1. Cluster1
 ```bash
