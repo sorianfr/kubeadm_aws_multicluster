@@ -110,7 +110,6 @@ spec:
     - Routes
   node: cluster1worker1
   updatePeriodSeconds: 10
-EOF
 ```
 2. Cluster2
 ```bash
@@ -137,7 +136,6 @@ spec:
     - Routes
   node: cluster1worker1
   updatePeriodSeconds: 10
-EOF
 ```
 ## IPPools
 
