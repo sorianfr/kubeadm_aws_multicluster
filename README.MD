@@ -185,23 +185,6 @@ spec:
 
 1. Copy & Paste
 
-  ```bash
-  kubectl patch felixconfiguration default --type='merge' -p "$(cat <<EOF
-  {
-    "spec": {
-      "externalNodesList": [
-        "$(nslookup cluster1controlplane | grep Address | tail -n 1 | awk '{print $2}')/32",
-        "$(nslookup cluster1worker1 | grep Address | tail -n 1 | awk '{print $2}')/32"
-      ]
-    }
-  }
-  EOF
-  )"
-```
-
-
-2. Copy & Paste
-
 
   ```bash
   kubectl patch felixconfiguration default --type='merge' -p "$(cat <<EOF
@@ -216,6 +199,25 @@ spec:
   EOF
   )"
   ```
+
+  
+
+2. Copy & Paste
+
+```bash
+  kubectl patch felixconfiguration default --type='merge' -p "$(cat <<EOF
+  {
+    "spec": {
+      "externalNodesList": [
+        "$(nslookup cluster1controlplane | grep Address | tail -n 1 | awk '{print $2}')/32",
+        "$(nslookup cluster1worker1 | grep Address | tail -n 1 | awk '{print $2}')/32"
+      ]
+    }
+  }
+  EOF
+  )"
+```
+
 
 ```bash
 kubectl run tmp-shell --rm -i --tty --image nicolaka/netshoot   
