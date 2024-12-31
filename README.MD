@@ -204,7 +204,8 @@ spec:
 
 2. Copy & Paste
 
-```bash
+
+  ```bash
   kubectl patch felixconfiguration default --type='merge' -p "$(cat <<EOF
   {
     "spec": {
@@ -216,7 +217,7 @@ spec:
   }
   EOF
   )"
-```
+  ```
 
 
 ```bash
