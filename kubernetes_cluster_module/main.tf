@@ -26,9 +26,13 @@
       route_table_id = var.private_route_table_id
     }
 
+    locals {
+          sg_name = "k8s_sg_${var.cluster_name}"
+    }
 
     # Security Group
     resource "aws_security_group" "k8s_sg" {
+      name        = local.sg_name
       vpc_id = var.vpc_id
 
       ingress {
