@@ -221,6 +221,17 @@ spec:
 
 
 ```bash
+kubectl create deployment nginx --image=nginx 
+```
+
+```bash
+kubectl create service nodeport nginx --tcp 80:80 
+```
+
+
+
+
+```bash
 kubectl run tmp-shell --rm -i --tty --image nicolaka/netshoot   
 ```
 
