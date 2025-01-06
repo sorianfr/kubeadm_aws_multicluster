@@ -146,3 +146,16 @@ variable "cluster_details" {
     }))
   }))
 }
+
+variable "asn" {
+  description = "Autonomous System Number for the cluster"
+  type        = number
+}
+
+variable "bgp_peers" {
+  description = "List of BGP peers for the cluster"
+  type        = list(object({
+    ip       = string
+    asNumber = number
+  }))
+}
