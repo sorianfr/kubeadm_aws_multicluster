@@ -4,6 +4,6 @@ metadata:
   name: default 
 spec: 
   logSeverityScreen: Info 
-  asNumber: 65001 
+  asNumber: ${asn}
   serviceClusterIPs: 
     - cidr: "${service_cidr}"
