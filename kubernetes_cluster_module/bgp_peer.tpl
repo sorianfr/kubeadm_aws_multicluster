@@ -5,7 +5,7 @@ metadata:
 spec:
   nodeSelector: all()
   peerSelector: |
-  {% for peer in bgp_peers %}
+  {% for peer in jsondecode(bgp_peers) %}
   - ip: {{ peer.peer_ip }}
     asNumber: {{ peer.peer_asn }}
   {% endfor %}
