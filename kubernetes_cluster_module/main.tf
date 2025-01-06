@@ -273,6 +273,19 @@
       content  = data.template_file.bgp_conf.rendered
     }
 
+    data "template_file" "bgp_peers" {
+          template = file("${path.module}/bgp_peer.tpl")
+          vars = {
+            cluster_name    = var.cluster_name
+            service_cidr    = var.service_cidr
+            asn    = var.asn
+          }
+        }
+
+    resource "local_file" "bgp_peers" {
+      filename = "${path.module}/bgp_peers-${var.cluster_name}.yaml"
+      content  = data.template_file.bgp_peers.rendered
+    }
     resource "null_resource" "copy_files_to_bastion" {
       provisioner "local-exec" {
         command = <<-EOT
