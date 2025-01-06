@@ -277,9 +277,8 @@
           template = file("${path.module}/bgp_peer.tpl")
           vars = {
             cluster_name    = var.cluster_name
-            service_cidr    = var.service_cidr
-            asn    = var.asn
-          }
+            bgp_peers    = var.bgp_peers
+            }
         }
 
     resource "local_file" "bgp_peers" {
