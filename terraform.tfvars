@@ -6,6 +6,10 @@ clusters = [
     pod_subnet              = "10.244.0.0/16"
     service_cidr            = "10.96.0.0/16"
     worker_count            = 1
+    bgp_peers = [
+      { peer_ip = "10.0.3.10", peer_asn = 65002 },
+      { peer_ip = "10.0.3.11", peer_asn = 65002 },
+    ]
   },
   {
     cluster_name                    = "cluster2"
@@ -14,5 +18,9 @@ clusters = [
     pod_subnet              = "10.245.0.0/16"
     service_cidr            = "10.100.0.0/16"
     worker_count            = 1
+    bgp_peers = [
+      { peer_ip = "10.0.2.10", peer_asn = 65001 },
+      { peer_ip = "10.0.2.11", peer_asn = 65001 },
+    ]
   }
 ]
