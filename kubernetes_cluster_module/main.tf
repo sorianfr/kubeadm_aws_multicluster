@@ -272,7 +272,7 @@
       filename = "${path.module}/bgp-peer-${var.cluster_name}.yaml"
       content  = templatefile("${path.module}/bgp-peer.tpl", {
         cluster_name = var.cluster_name
-        bgp_peers    = var.bgp_peers
+        bgp_peers    = jsonencode(var.bgp_peers)
       })
     }
 
