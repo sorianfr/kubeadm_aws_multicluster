@@ -263,6 +263,7 @@
           template = file("${path.module}/bgp_conf.tpl")
           vars = {
             cluster_name    = var.cluster_name
+            service_cidr    = var.service_cidr
             asn    = var.asn
           }
         }
