@@ -268,7 +268,7 @@
       })
     }
 
-    resource "local_file" "bgp_peer" {
+    resource "local_file" "bgp_peers" {
       filename = "${path.module}/bgp-peer-${var.cluster_name}.yaml"
       content  = templatefile("${path.module}/bgp-peer.tpl", {
         cluster_name = var.cluster_name
