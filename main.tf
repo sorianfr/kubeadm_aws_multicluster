@@ -240,6 +240,8 @@ module "kubernetes_clusters" {
   service_cidr             = each.value.service_cidr
   
   worker_count             = each.value.worker_count
+  asnumber                 = each.value.asnumber
+
 
   # Pass the private key
   private_key              = tls_private_key.k8s_key_pair.private_key_pem
