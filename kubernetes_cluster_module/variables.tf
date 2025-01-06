@@ -125,6 +125,7 @@ variable "clusters" {
     pod_subnet              = string
     worker_count            = number
     service_cidr            = string
+    asn                       = number
     bgp_peers                 = list(object({
       ip       = string
       asNumber = number
