@@ -259,12 +259,24 @@
       content  = data.template_file.custom_resources.rendered
     }
 
+    data "template_file" "bgp_conf" {
+          template = file("${path.module}/bgp_conf.tpl")
+          vars = {
+            cluster_name    = var.cluster_name
+            asn    = var.asn
+          }
+        }
+
+    resource "local_file" "bgp_conf" {
+      filename = "${path.module}/bgp_conf-${var.cluster_name}.yaml"
+      content  = data.template_file.bgp_conf.rendered
+    }
 
     resource "null_resource" "copy_files_to_bastion" {
       provisioner "local-exec" {
         command = <<-EOT
           sleep 60
-          for file in ${join(" ", concat(var.copy_files_to_bastion, [local_file.kubeadm_config.filename, local_file.custom_resources.filename]))}; do
+          for file in ${join(" ", concat(var.copy_files_to_bastion, [local_file.kubeadm_config.filename, local_file.custom_resources.filename, local_file.bgp_conf.filename]))}; do
             echo "Copying $file to bastion"
             scp -i "my_k8s_key.pem" -o StrictHostKeyChecking=no "$file" ubuntu@${var.bastion_public_dns}:~/
           done
