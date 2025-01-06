@@ -155,7 +155,7 @@ variable "asn" {
 variable "bgp_peers" {
   description = "List of BGP peers for the cluster"
   type        = list(object({
-    ip       = string
-    asNumber = number
+    peer_ip       = string
+    peer_asn      = number
   }))
 }
