@@ -259,32 +259,24 @@
       content  = data.template_file.custom_resources.rendered
     }
 
-    data "template_file" "bgp_conf" {
-          template = file("${path.module}/bgp-conf.tpl")
-          vars = {
-            cluster_name    = var.cluster_name
-            service_cidr    = var.service_cidr
-            asn    = var.asn
-          }
-        }
-
     resource "local_file" "bgp_conf" {
       filename = "${path.module}/bgp-conf-${var.cluster_name}.yaml"
-      content  = data.template_file.bgp_conf.rendered
+      content  = templatefile("${path.module}/bgp-conf.tpl", {
+        cluster_name = var.cluster_name
+        service_cidr = var.service_cidr
+        asn          = var.asn
+      })
     }
 
-    data "template_file" "bgp_peers" {
-          template = file("${path.module}/bgp-peer.tpl")
-          vars = {
-            cluster_name    = var.cluster_name
-            bgp_peers    = jsonencode(var.bgp_peers)
-            }
-        }
-
-    resource "local_file" "bgp_peers" {
-      filename = "${path.module}/bgp-peers-${var.cluster_name}.yaml"
-      content  = data.template_file.bgp_peers.rendered
+    resource "local_file" "bgp_peer" {
+      filename = "${path.module}/bgp-peer-${var.cluster_name}.yaml"
+      content  = templatefile("${path.module}/bgp-peer.tpl", {
+        cluster_name = var.cluster_name
+        bgp_peers    = var.bgp_peers
+      })
     }
+
+
     resource "null_resource" "copy_files_to_bastion" {
       provisioner "local-exec" {
         command = <<-EOT
