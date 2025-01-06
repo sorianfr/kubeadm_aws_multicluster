@@ -305,7 +305,7 @@
         inline = [
           "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no my_k8s_key.pem ubuntu@${var.controlplane_private_ip}:~/",
           "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no kubeadm-config-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/",
-          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no custom-resources-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/"
+          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no custom-resources-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/",
           "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no bgp-conf-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/"
 
         ]
