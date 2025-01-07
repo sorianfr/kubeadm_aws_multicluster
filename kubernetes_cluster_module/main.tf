@@ -285,13 +285,16 @@
       filename = "${path.module}/bgp-peer-${var.cluster_name}-${each.value.peer_ip}.yaml"
       content  = each.value
     }
-
+    
+    locals {
+      bgp_peer_files = [for file in local_file.bgp_peer : file.filename]
+    }
 
     resource "null_resource" "copy_files_to_bastion" {
       provisioner "local-exec" {
         command = <<-EOT
           sleep 60
-          for file in ${join(" ", concat(var.copy_files_to_bastion, [local_file.kubeadm_config.filename, local_file.custom_resources.filename, local_file.bgp_conf.filename, local_file.bgp_peer[each.key].filename]))}; do
+          for file in ${join(" ", concat(var.copy_files_to_bastion, [local_file.kubeadm_config.filename, local_file.custom_resources.filename, local_file.bgp_conf.filename], local.bgp_peer_files))}; do
             echo "Copying $file to bastion"
             scp -i "my_k8s_key.pem" -o StrictHostKeyChecking=no "$file" ubuntu@${var.bastion_public_dns}:~/
           done
@@ -299,7 +302,7 @@
         EOT
       }
 
-      depends_on = [local_file.kubeadm_config, local_file.custom_resources]
+      depends_on = [local_file.kubeadm_config, local_file.custom_resources, local_file.bgp_peer]
     }
 
     resource "null_resource" "copy_files_to_controlplane" {
