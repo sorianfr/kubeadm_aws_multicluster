@@ -272,20 +272,20 @@
           content  = data.template_file.bgp_conf.rendered
         }
 
-    data "template_file" "bgp_peer" {
-      template = file("${path.module}/bgp-peer.tpl")
-      vars = {
-        cluster_name = var.cluster_name
-        peer         = each.value
-      }
+    locals {
+      bgp_peer_templates = { for idx, peer in var.bgp_peers : idx => templatefile("${path.module}/bgp-peer.tpl", {
+        cluster_name = var.cluster_name,
+        peer         = peer
+      }) }
     }
-
+    
     resource "local_file" "bgp_peer" {
-      for_each = { for idx, peer in var.bgp_peers : idx => peer }
+      for_each = local.bgp_peer_templates
     
       filename = "${path.module}/bgp-peer-${var.cluster_name}-${each.value.peer_ip}.yaml"
-      content  = data.template_file.bgp_peer.rendered
+      content  = each.value
     }
+
 
     resource "null_resource" "copy_files_to_bastion" {
       provisioner "local-exec" {
