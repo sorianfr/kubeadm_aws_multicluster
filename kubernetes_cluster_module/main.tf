@@ -259,23 +259,33 @@
       content  = data.template_file.custom_resources.rendered
     }
 
-    resource "local_file" "bgp_conf" {
-      filename = "${path.module}/bgp-conf-${var.cluster_name}.yaml"
-      content  = templatefile("${path.module}/bgp-conf.tpl", {
-        cluster_name = var.cluster_name
+    data "template_file" "bgp_conf" {
+      template = file("${path.module}/bgp-conf.tpl")
+      vars = {
         service_cidr = var.service_cidr
         asn          = var.asn
-      })
+      }
     }
 
-    resource "local_file" "bgp_peers" {
-      filename = "${path.module}/bgp-peer-${var.cluster_name}.yaml"
-      content  = templatefile("${path.module}/bgp-peer.tpl", {
+    resource "local_file" "bgp_conf" {
+          filename = "${path.module}/bgp-conf-${var.cluster_name}.yaml"
+          content  = data.template_file.bgp-conf.rendered
+        }
+
+    data "template_file" "bgp_peer_template" {
+      template = file("${path.module}/bgp-peer.tpl")
+      vars = {
         cluster_name = var.cluster_name
-        bgp_peers    = jsonencode(var.bgp_peers)
-      })
+        peer         = each.value
+      }
     }
 
+    resource "local_file" "bgp_peer" {
+      for_each = { for idx, peer in var.bgp_peers : idx => peer }
+    
+      filename = "${path.module}/bgp-peer-${var.cluster_name}-${each.value.peer_ip}.yaml"
+      content  = data.template_file.bgp_peer_template.rendered
+    }
 
     resource "null_resource" "copy_files_to_bastion" {
       provisioner "local-exec" {
