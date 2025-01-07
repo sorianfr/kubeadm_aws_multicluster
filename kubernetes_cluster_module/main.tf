@@ -269,10 +269,10 @@
 
     resource "local_file" "bgp_conf" {
           filename = "${path.module}/bgp-conf-${var.cluster_name}.yaml"
-          content  = data.template_file.bgp-conf.rendered
+          content  = data.template_file.bgp_conf.rendered
         }
 
-    data "template_file" "bgp_peer_template" {
+    data "template_file" "bgp_peer" {
       template = file("${path.module}/bgp-peer.tpl")
       vars = {
         cluster_name = var.cluster_name
@@ -284,14 +284,14 @@
       for_each = { for idx, peer in var.bgp_peers : idx => peer }
     
       filename = "${path.module}/bgp-peer-${var.cluster_name}-${each.value.peer_ip}.yaml"
-      content  = data.template_file.bgp_peer_template.rendered
+      content  = data.template_file.bgp_peer.rendered
     }
 
     resource "null_resource" "copy_files_to_bastion" {
       provisioner "local-exec" {
         command = <<-EOT
           sleep 60
-          for file in ${join(" ", concat(var.copy_files_to_bastion, [local_file.kubeadm_config.filename, local_file.custom_resources.filename, local_file.bgp_conf.filename, local_file.bgp_peers.filename]))}; do
+          for file in ${join(" ", concat(var.copy_files_to_bastion, [local_file.kubeadm_config.filename, local_file.custom_resources.filename, local_file.bgp_conf.filename, local_file.bgp_peer.filename]))}; do
             echo "Copying $file to bastion"
             scp -i "my_k8s_key.pem" -o StrictHostKeyChecking=no "$file" ubuntu@${var.bastion_public_dns}:~/
           done
@@ -308,8 +308,7 @@
           "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no my_k8s_key.pem ubuntu@${var.controlplane_private_ip}:~/",
           "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no kubeadm-config-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/",
           "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no custom-resources-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/",
-          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no bgp-conf-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/",
-          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no bgp-peer-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/"
+          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no bgp-conf-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/"
   
         ]
 
