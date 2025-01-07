@@ -9,7 +9,7 @@ clusters = [
     asn                = 65001
     bgp_peers = [
       { peer_ip = "10.0.3.10", peer_asn = 65002 },
-      { peer_ip = "10.0.3.11", peer_asn = 65002 },
+      { peer_ip = "10.0.3.11", peer_asn = 65002 }
     ]
   },
   {
@@ -22,7 +22,7 @@ clusters = [
     asn                = 65002
     bgp_peers = [
       { peer_ip = "10.0.2.10", peer_asn = 65001 },
-      { peer_ip = "10.0.2.11", peer_asn = 65001 },
+      { peer_ip = "10.0.2.11", peer_asn = 65001 }
     ]
   }
 ]
