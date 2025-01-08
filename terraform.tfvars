@@ -8,9 +8,8 @@ clusters = [
     worker_count            = 1
     asn                = 65001
     bgp_peers = [
-      { peer_ip = "10.0.3.10", peer_asn = 65002 },
-      { peer_ip = "10.0.3.11", peer_asn = 65002 }
-    ]
+      { target_cluster = "cluster2" }
+      ]
   },
   {
     cluster_name                    = "cluster2"
@@ -21,8 +20,7 @@ clusters = [
     worker_count            = 1
     asn                = 65002
     bgp_peers = [
-      { peer_ip = "10.0.2.10", peer_asn = 65001 },
-      { peer_ip = "10.0.2.11", peer_asn = 65001 }
+      { target_cluster = "cluster1" }
     ]
   }
 ]
