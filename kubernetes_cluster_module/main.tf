@@ -314,6 +314,9 @@
       ])
     }
 
+    locals {
+      bgp_peer_files = [for file in local_file.bgp_peer : file.filename]
+    }
 
     resource "null_resource" "copy_files_to_bastion" {
       provisioner "local-exec" {
@@ -338,6 +341,9 @@
           "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no custom-resources-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/",
           "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no bgp-conf-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/"
   
+        ],
+        [
+        for file in local.bgp_peer_files : "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no ${file} ubuntu@${var.controlplane_private_ip}:~/"
         ]
 
         connection {
