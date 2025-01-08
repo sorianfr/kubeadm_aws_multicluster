@@ -1,7 +1,7 @@
 apiVersion: projectcalico.org/v3
 kind: BGPPeer
 metadata:
-  name: bgp-peer-${cluster_name}-${peer.peer_ip}
+  name: bgp-peer-from${cluster_name}-to-${targer_node}-${targer_cluster}
 spec:
   nodeSelector: all()
   peerSelector: 
