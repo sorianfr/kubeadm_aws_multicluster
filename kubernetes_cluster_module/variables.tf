@@ -127,8 +127,7 @@ variable "clusters" {
     service_cidr            = string
     asn                       = number
     bgp_peers                 = list(object({
-      peer_ip       = string
-      peer_asn      = number
+      target_cluster = string
     }))
   }))
 }
@@ -155,7 +154,6 @@ variable "asn" {
 variable "bgp_peers" {
   description = "List of BGP peers for the cluster"
   type        = list(object({
-    peer_ip       = string
-    peer_asn      = number
-  }))
+    target_cluster = string
+    }))
 }
