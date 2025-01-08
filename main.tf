@@ -19,47 +19,6 @@ locals {
       ]
     }
   }
-
-  # Dynamically generate BGP peers for control plane and workers in the target cluster
-  resolved_bgp_peers = [
-    for peer in var.bgp_peers : {
-      target_cluster = peer.target_cluster
-      peers = concat(
-        [
-          {
-            peer_ip    = local.cluster_details[peer.target_cluster].control_plane.ip
-            peer_asn   = local.cluster_details[peer.target_cluster].asn
-            node_name  = "controlplane"
-          }
-        ],
-        [
-          for worker in local.cluster_details[peer.target_cluster].workers : {
-            peer_ip    = worker.ip
-            peer_asn   = local.cluster_details[peer.target_cluster].asn
-            node_name  = worker.hostname
-          }
-        ]
-      )
-    }
-  ]
-}
-
-resource "local_file" "bgp_peer" {
-  for_each = {
-    for cluster_data in local.resolved_bgp_peers :
-    cluster_data.target_cluster => cluster_data
-  }
-
-  filename = "${path.module}/BGPPeerFrom${var.cluster_name}To${each.value.target_cluster}.yaml"
-  content  = join("\n", [
-    for peer in each.value.peers : templatefile("${path.module}/bgp-peer.tpl", {
-      source_cluster = var.cluster_name,
-      target_cluster = each.value.target_cluster,
-      target_node    = peer.node_name,
-      peer_ip        = peer.peer_ip,
-      peer_asn       = peer.peer_asn
-    })
-  ])
 }
 
 
