@@ -44,6 +44,25 @@ locals {
   ]
 }
 
+resource "local_file" "bgp_peer" {
+  for_each = {
+    for cluster_data in local.resolved_bgp_peers :
+    cluster_data.target_cluster => cluster_data
+  }
+
+  filename = "${path.module}/BGPPeerFrom${var.cluster_name}To${each.value.target_cluster}.yaml"
+  content  = join("\n", [
+    for peer in each.value.peers : templatefile("${path.module}/bgp-peer.tpl", {
+      source_cluster = var.cluster_name,
+      target_cluster = each.value.target_cluster,
+      target_node    = peer.node_name,
+      peer_ip        = peer.peer_ip,
+      peer_asn       = peer.peer_asn
+    })
+  ])
+}
+
+
 # Generate a TLS private key
 resource "tls_private_key" "k8s_key_pair" {
   algorithm = "RSA"
