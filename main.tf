@@ -7,6 +7,7 @@ locals {
   cluster_details = {
     for cluster in var.clusters :
     cluster.cluster_name => {
+      asn           = cluster.asn
       control_plane = {
         ip       = cluster.controlplane_private_ip
         hostname = "${cluster.cluster_name}controlplane"
