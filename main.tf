@@ -19,6 +19,29 @@ locals {
       ]
     }
   }
+
+  # Dynamically generate BGP peers for control plane and workers in the target cluster
+  resolved_bgp_peers = [
+    for peer in var.bgp_peers : {
+      target_cluster = peer.target_cluster
+      peers = concat(
+        [
+          {
+            peer_ip    = local.cluster_details[peer.target_cluster].control_plane.ip
+            peer_asn   = local.cluster_details[peer.target_cluster].asn
+            node_name  = "controlplane"
+          }
+        ],
+        [
+          for worker in local.cluster_details[peer.target_cluster].workers : {
+            peer_ip    = worker.ip
+            peer_asn   = local.cluster_details[peer.target_cluster].asn
+            node_name  = worker.hostname
+          }
+        ]
+      )
+    }
+  ]
 }
 
 # Generate a TLS private key
