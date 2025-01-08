@@ -273,6 +273,49 @@
         }
 
     locals {
+      resolved_bgp_peers = [
+        for peer in var.bgp_peers : {
+          target_cluster = peer.target_cluster
+          peers = concat(
+            [
+              {
+                peer_ip  = var.cluster_details[peer.target_cluster].control_plane.ip
+                peer_asn = var.cluster_details[peer.target_cluster].asn
+                node_name = "controlplane"
+              }
+            ],
+            [
+              for worker in var.cluster_details[peer.target_cluster].workers : {
+                peer_ip  = worker.ip
+                peer_asn = var.cluster_details[peer.target_cluster].asn
+                node_name = worker.hostname
+              }
+            ]
+          )
+        }
+      ]
+    }
+
+    resource "local_file" "bgp_peer" {
+      for_each = {
+        for peer_group in local.resolved_bgp_peers :
+        peer_group.target_cluster => peer_group.peers
+      }
+    
+      filename = "${path.module}/BGPPeerFrom${var.cluster_name}To${each.key}.yaml"
+      content = join("\n---\n", [
+        for peer in each.value : templatefile("${path.module}/bgp-peer.tpl", {
+          source_cluster = var.cluster_name,
+          target_cluster = each.key,
+          target_node    = peer.node_name,
+          peer_ip        = peer.peer_ip,
+          peer_asn       = peer.peer_asn
+        })
+      ])
+    }
+
+
+    locals {
       bgp_peer_templates = { 
         for idx, peer in var.bgp_peers : 
         idx => {
