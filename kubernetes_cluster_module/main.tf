@@ -281,7 +281,7 @@
               {
                 peer_ip  = var.cluster_details[peer.target_cluster].control_plane.ip
                 peer_asn = var.cluster_details[peer.target_cluster].asn
-                node_name = controlplane.hostname
+                node_name = control_plane.hostname
               }
             ],
             [
