@@ -9,3 +9,7 @@ output "debug_cluster_name" {
 output "debug_bgp_peers" {
   value = jsonencode(var.bgp_peers)
 }
+
+output "resolved_bgp_peers" {
+  value = local.resolved_bgp_peers
+}
