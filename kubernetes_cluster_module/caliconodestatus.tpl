@@ -7,5 +7,5 @@ spec:
     - Agent
     - BGP
     - Routes
-  node: ${target_node}
+  node: ${node_name}
   updatePeriodSeconds: 10
