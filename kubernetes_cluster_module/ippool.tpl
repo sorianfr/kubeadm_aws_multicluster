@@ -14,6 +14,6 @@ kind: IPPool
 metadata: 
   name: ${target_cluster}-pod-cidr 
 spec: 
-  cidr: ${target_cluster_pod_cidr} 
+  cidr: ${target_cluster_pod_subnet} 
   ipipMode: CrossSubnet 
   disabled: true 
