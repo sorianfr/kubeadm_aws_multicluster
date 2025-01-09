@@ -296,6 +296,23 @@
       ]
     }
 
+    locals {
+          resolved_target_clusters = [
+            for target in var.bgp_peers : {
+              target_cluster = target.target_cluster
+              target_cluster_config = [
+                  {
+                    target_cluster_service_cidr  = var.cluster_details[target.target_cluster].service_cidr
+                    target_cluster_pod_cidr = var.cluster_details[target.target_cluster].pod_cidr
+                  }
+                ]
+            }
+          ]
+        }
+
+
+
+
     resource "local_file" "bgp_peer" {
       for_each = {
         for peer_group in local.resolved_bgp_peers :
