@@ -360,7 +360,7 @@
         for target in var.bgp_peers : {
           target_cluster               = target.target_cluster
           target_cluster_service_cidr  = var.cluster_details[target.target_cluster].service_cidr
-          target_cluster_pod_cidr      = var.cluster_details[target.target_cluster].pod_subnet
+          target_cluster_pod_subnet      = var.cluster_details[target.target_cluster].pod_subnet
         }
       ]
     }
@@ -372,7 +372,7 @@
           for cluster in local.resolved_target_clusters : templatefile("${path.module}/ippool.tpl", {
             target_cluster              = cluster.target_cluster,
             target_cluster_service_cidr = cluster.target_cluster_service_cidr,
-            target_cluster_pod_cidr     = cluster.target_cluster_pod_cidr
+            target_cluster_pod_subnet     = cluster.target_cluster_pod_subnet
           })
         ]
       )
