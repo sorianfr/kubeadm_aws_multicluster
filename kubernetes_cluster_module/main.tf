@@ -448,7 +448,7 @@
         bgp_conf           = local_file.bgp_conf.content
         calico_node_status = local_file.calico_node_status.content
         ippool             = local_file.ippool.content
-        bgp_peer_files     = join(",", [for file in local.bgp_peer_files : filesha256(file.content)])
+        bgp_peer_files     = join(",", [for file in local.bgp_peer_files : file.hash])
       }
 
 
