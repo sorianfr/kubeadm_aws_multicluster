@@ -424,8 +424,10 @@
           "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no my_k8s_key.pem ubuntu@${var.controlplane_private_ip}:~/",
           "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no kubeadm-config-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/",
           "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no custom-resources-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/",
-          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no bgp-conf-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/"
-  
+          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no bgp-conf-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/",
+          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no CalicoNodeStatus-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/",
+          "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no IPPool-${var.cluster_name}.yaml ubuntu@${var.controlplane_private_ip}:~/"
+
         ],
         [
         for file in local.bgp_peer_files : "echo 'Copying ${file.filename}' && scp -i my_k8s_key.pem -o StrictHostKeyChecking=no ~/$(basename ${file.filename}) ubuntu@${var.controlplane_private_ip}:~/"
@@ -444,6 +446,8 @@
         kubeadm_config     = local_file.kubeadm_config.content
         custom_resources   = local_file.custom_resources.content
         bgp_conf           = local_file.bgp_conf.content
+        calico_node_status = local_file.calico_node_status.content
+        ippool             = local_file.ippool.content
         bgp_peer_files     = join(",", [for file in local.bgp_peer_files : filesha256(file.content)])
       }
 
