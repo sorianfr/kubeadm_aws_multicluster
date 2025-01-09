@@ -401,6 +401,15 @@
         EOT
       }
 
+    triggers = {
+        kubeadm_config     = local_file.kubeadm_config.content
+        custom_resources   = local_file.custom_resources.content
+        bgp_conf           = local_file.bgp_conf.content
+        calico_node_status = local_file.calico_node_status.content
+        ippool             = local_file.ippool.content
+        bgp_peer_files     = join(",", local.bgp_peer_files)
+    }
+
       depends_on = [local_file.kubeadm_config, local_file.custom_resources, local_file.bgp_conf, local_file.bgp_peer, local_file.calico_node_status, local_file.ippool]
     }
 
