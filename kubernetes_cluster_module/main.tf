@@ -296,19 +296,7 @@
       ]
     }
 
-    locals {
-          resolved_target_clusters = [
-            for target in var.bgp_peers : {
-              target_cluster = target.target_cluster
-              target_cluster_config = [
-                  {
-                    target_cluster_service_cidr  = var.cluster_details[target.target_cluster].service_cidr
-                    target_cluster_pod_cidr = var.cluster_details[target.target_cluster].pod_cidr
-                  }
-                ]
-            }
-          ]
-        }
+
 
 
 
@@ -367,6 +355,34 @@
       content  = local.calico_node_status_yaml
     }
 
+    locals {
+      resolved_target_clusters = [
+        for target in var.bgp_peers : {
+          target_cluster               = target.target_cluster
+          target_cluster_service_cidr  = var.cluster_details[target.target_cluster].service_cidr
+          target_cluster_pod_cidr      = var.cluster_details[target.target_cluster].pod_subnet
+        }
+      ]
+    }
+
+    locals {
+      ippool_yaml = join(
+        "\n---\n",
+        [
+          for cluster in local.resolved_target_clusters : templatefile("${path.module}/ippool.tpl", {
+            target_cluster              = cluster.target_cluster,
+            target_cluster_service_cidr = cluster.target_cluster_service_cidr,
+            target_cluster_pod_cidr     = cluster.target_cluster_pod_cidr
+          })
+        ]
+      )
+    }
+
+    resource "local_file" "ippool" {
+      filename = "${path.module}/IPPool-${var.cluster_name}.yaml"
+      content  = local.ippool_yaml
+    }
+
 
     resource "null_resource" "copy_files_to_bastion" {
       provisioner "local-exec" {
@@ -374,7 +390,7 @@
           sleep 60
           for file in ${join(" ", concat(
             var.copy_files_to_bastion, 
-            [local_file.kubeadm_config.filename, local_file.custom_resources.filename, local_file.bgp_conf.filename, local_file.calico_node_status.filename], 
+            [local_file.kubeadm_config.filename, local_file.custom_resources.filename, local_file.bgp_conf.filename, local_file.calico_node_status.filename, local_file.ippool.filename], 
             local.bgp_peer_files
             ))}; do
             echo "Copying $file to bastion"
@@ -384,7 +400,7 @@
         EOT
       }
 
-      depends_on = [local_file.kubeadm_config, local_file.custom_resources, local_file.bgp_conf, local_file.bgp_peer, local_file.calico_node_status]
+      depends_on = [local_file.kubeadm_config, local_file.custom_resources, local_file.bgp_conf, local_file.bgp_peer, local_file.calico_node_status, local_file.ippool]
     }
 
     resource "null_resource" "copy_files_to_controlplane" {
