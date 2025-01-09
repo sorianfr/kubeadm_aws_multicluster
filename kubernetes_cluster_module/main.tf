@@ -440,6 +440,14 @@
         }
       }
 
+      triggers = {
+        kubeadm_config     = local_file.kubeadm_config.content
+        custom_resources   = local_file.custom_resources.content
+        bgp_conf           = local_file.bgp_conf.content
+        bgp_peer_files     = join(",", [for file in local.bgp_peer_files : filesha256(file.content)])
+      }
+
+
       depends_on = [null_resource.copy_files_to_bastion, aws_instance.controlplane, null_resource.wait_for_workers_setup]
     }
 
