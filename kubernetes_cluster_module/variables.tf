@@ -136,6 +136,8 @@ variable "cluster_details" {
   description = "Preprocessed cluster IPs and hostnames for all clusters"
   type = map(object({
     asn           = number
+    service_cidr  = string
+    pod_subnet    = string
     control_plane = object({
       ip       = string
       hostname = string
