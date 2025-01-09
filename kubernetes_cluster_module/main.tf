@@ -320,7 +320,13 @@
     }
 
     locals {
-      bgp_peer_files = [for file in local_file.bgp_peer : file.filename]
+      bgp_peer_files = [
+        for file in local_file.bgp_peer :
+        {
+          filename = file.filename
+          hash     = filesha256(file.content)
+        }
+      ]
     }
 
     locals {
@@ -391,7 +397,7 @@
           for file in ${join(" ", concat(
             var.copy_files_to_bastion, 
             [local_file.kubeadm_config.filename, local_file.custom_resources.filename, local_file.bgp_conf.filename, local_file.calico_node_status.filename, local_file.ippool.filename], 
-            local.bgp_peer_files
+            [for file in local.bgp_peer_files : file.filename]
             ))}; do
             echo "Copying $file to bastion"
             scp -i "my_k8s_key.pem" -o StrictHostKeyChecking=no "$file" ubuntu@${var.bastion_public_dns}:~/
@@ -406,7 +412,7 @@
         bgp_conf           = local_file.bgp_conf.content
         calico_node_status = local_file.calico_node_status.content
         ippool             = local_file.ippool.content
-        bgp_peer_files     = join(",", local.bgp_peer_files)
+        bgp_peer_files     = join(",", [for file in local.bgp_peer_files : filesha256(file.content)])
     }
 
       depends_on = [local_file.kubeadm_config, local_file.custom_resources, local_file.bgp_conf, local_file.bgp_peer, local_file.calico_node_status, local_file.ippool]
