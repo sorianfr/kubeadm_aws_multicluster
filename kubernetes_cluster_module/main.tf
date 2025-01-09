@@ -428,7 +428,7 @@
   
         ],
         [
-        for file in local.bgp_peer_files : "echo 'Copying ${file}' && scp -i my_k8s_key.pem -o StrictHostKeyChecking=no ~/$(basename ${file}) ubuntu@${var.controlplane_private_ip}:~/"
+        for file in local.bgp_peer_files : "echo 'Copying ${file.filename}' && scp -i my_k8s_key.pem -o StrictHostKeyChecking=no ~/$(basename ${file.filename}) ubuntu@${var.controlplane_private_ip}:~/"
         ]
         )
 
