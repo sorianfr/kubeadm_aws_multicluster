@@ -387,7 +387,6 @@
     resource "null_resource" "copy_files_to_bastion" {
       provisioner "local-exec" {
         command = <<-EOT
-          ssh -i "my_k8s_key.pem" -o StrictHostKeyChecking=no ubuntu@${var.bastion_public_dns} "rm -f ~/BGPPeerFrom* ~/CalicoNodeStatus* ~/IPPool*"
           sleep 60
           for file in ${join(" ", concat(
             var.copy_files_to_bastion, 
