@@ -319,10 +319,10 @@
     }
 
     locals {
-      calico_node_status_configs = [
-        var.cluster_details[var.cluster_name].control_plane.hostname,
-        for worker in var.cluster_details[var.cluster_name].workers : worker.hostname
-      ]
+      calico_node_status_configs = concat(
+        [var.cluster_details[var.cluster_name].control_plane.hostname],
+        [for worker in var.cluster_details[var.cluster_name].workers : worker.hostname]
+      )
     }
 
     locals {
