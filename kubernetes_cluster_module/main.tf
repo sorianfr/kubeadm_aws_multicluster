@@ -318,11 +318,44 @@
       bgp_peer_files = [for file in local_file.bgp_peer : file.filename]
     }
 
+    locals {
+      calico_node_status_configs = [
+        var.cluster_details[var.cluster_name].control_plane.hostname,
+        for worker in var.cluster_details[var.cluster_name].workers : worker.hostname
+      ]
+    }
+
+    locals {
+      calico_node_status_yaml = join(
+        "\n---\n",
+        [
+          templatefile("${path.module}/caliconodestatus.tpl", {
+            cluster_name = var.cluster_name,
+            node_name    = var.cluster_details[var.cluster_name].control_plane.hostname
+          }),
+          for worker in var.cluster_details[var.cluster_name].workers : templatefile("${path.module}/caliconodestatus.tpl", {
+            cluster_name = var.cluster_name,
+            node_name    = worker.hostname
+          })
+        ]
+      )
+    }
+
+    resource "local_file" "calico_node_status" {
+      filename = "${path.module}/CalicoNodeStatus-${var.cluster_name}.yaml"
+      content  = local.calico_node_status_yaml
+    }
+
+
     resource "null_resource" "copy_files_to_bastion" {
       provisioner "local-exec" {
         command = <<-EOT
           sleep 60
-          for file in ${join(" ", concat(var.copy_files_to_bastion, [local_file.kubeadm_config.filename, local_file.custom_resources.filename, local_file.bgp_conf.filename], local.bgp_peer_files))}; do
+          for file in ${join(" ", concat(
+            var.copy_files_to_bastion, 
+            [local_file.kubeadm_config.filename, local_file.custom_resources.filename, local_file.bgp_conf.filename, local_file.calico_node_status.filename], 
+            local.bgp_peer_files
+            ))}; do
             echo "Copying $file to bastion"
             scp -i "my_k8s_key.pem" -o StrictHostKeyChecking=no "$file" ubuntu@${var.bastion_public_dns}:~/
           done
@@ -330,7 +363,7 @@
         EOT
       }
 
-      depends_on = [local_file.kubeadm_config, local_file.custom_resources, local_file.bgp_peer]
+      depends_on = [local_file.kubeadm_config, local_file.custom_resources, local_file.bgp_conf, local_file.bgp_peer, local_file.calico_node_status]
     }
 
     resource "null_resource" "copy_files_to_controlplane" {
