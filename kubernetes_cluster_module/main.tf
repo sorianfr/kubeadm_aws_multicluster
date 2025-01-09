@@ -328,16 +328,20 @@
     locals {
       calico_node_status_yaml = join(
         "\n---\n",
-        [
-          templatefile("${path.module}/caliconodestatus.tpl", {
-            cluster_name = var.cluster_name,
-            node_name    = var.cluster_details[var.cluster_name].control_plane.hostname
-          }),
-          for worker in var.cluster_details[var.cluster_name].workers : templatefile("${path.module}/caliconodestatus.tpl", {
-            cluster_name = var.cluster_name,
-            node_name    = worker.hostname
-          })
-        ]
+        concat(
+          [
+            templatefile("${path.module}/caliconodestatus.tpl", {
+              cluster_name = var.cluster_name,
+              node_name    = var.cluster_details[var.cluster_name].control_plane.hostname
+            })
+          ],
+          [
+            for worker in var.cluster_details[var.cluster_name].workers : templatefile("${path.module}/caliconodestatus.tpl", {
+              cluster_name = var.cluster_name,
+              node_name    = worker.hostname
+            })
+          ]
+        )
       )
     }
 
