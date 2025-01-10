@@ -608,3 +608,108 @@
     null_resource.update_hosts
   ]
 }
+
+    resource "null_resource" "apply_bgp_conf" {
+      provisioner "remote-exec" {
+        inline = [
+          "kubectl apply -f bgp-conf-${var.cluster_name}.yaml"
+        ]
+    
+        connection {
+          type                = "ssh"
+          host                = var.controlplane_private_ip
+          user                = "ubuntu"
+          private_key         = var.private_key
+          bastion_host        = var.bastion_public_dns
+          bastion_user        = "ubuntu"
+          bastion_private_key = var.private_key
+        }
+      }
+    
+      triggers = {
+        bgp_conf = local_file.bgp_conf.content
+      }
+    
+      depends_on = [
+        null_resource.kubeadm_init,
+        null_resource.copy_files_to_controlplane
+      ]
+    }
+
+resource "null_resource" "apply_bgp_peers" {
+  provisioner "remote-exec" {
+    inline = [
+      for file in local.bgp_peer_files : "kubectl apply -f ${file.filename}"
+    ]
+
+    connection {
+      type                = "ssh"
+      host                = var.controlplane_private_ip
+      user                = "ubuntu"
+      private_key         = var.private_key
+      bastion_host        = var.bastion_public_dns
+      bastion_user        = "ubuntu"
+      bastion_private_key = var.private_key
+    }
+  }
+
+  triggers = {
+    bgp_peer_files     = join(",", [for file in local.bgp_peer_files : file.hash])
+  }
+
+  depends_on = [
+    null_resource.apply_bgp_conf
+  ]
+}
+
+resource "null_resource" "apply_caliconodestatus" {
+  provisioner "remote-exec" {
+    inline = [
+      "kubectl apply -f calico-node-status-${var.cluster_name}.yaml"
+    ]
+
+    connection {
+      type                = "ssh"
+      host                = var.controlplane_private_ip
+      user                = "ubuntu"
+      private_key         = var.private_key
+      bastion_host        = var.bastion_public_dns
+      bastion_user        = "ubuntu"
+      bastion_private_key = var.private_key
+    }
+  }
+
+  triggers = {
+    calico_node_status = local_file.calico_node_status.content
+  }
+
+  depends_on = [
+    null_resource.apply_bgp_conf
+  ]
+}
+
+resource "null_resource" "apply_ippools" {
+  provisioner "remote-exec" {
+    inline = [
+      "kubectl apply -f ippool-${var.cluster_name}.yaml"
+    ]
+
+    connection {
+      type                = "ssh"
+      host                = var.controlplane_private_ip
+      user                = "ubuntu"
+      private_key         = var.private_key
+      bastion_host        = var.bastion_public_dns
+      bastion_user        = "ubuntu"
+      bastion_private_key = var.private_key
+    }
+  }
+
+  triggers = {
+    ippool = local_file.ippool.content
+  }
+
+  depends_on = [
+    null_resource.apply_bgp_conf
+  ]
+}
