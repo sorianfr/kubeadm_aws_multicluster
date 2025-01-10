@@ -612,6 +612,7 @@
     resource "null_resource" "apply_bgp_conf" {
       provisioner "remote-exec" {
         inline = [
+          "sleep 120",
           # Apply the BGP configuration
           "kubectl apply -f bgp-conf-${var.cluster_name}.yaml"
         ]
