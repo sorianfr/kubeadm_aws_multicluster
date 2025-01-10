@@ -664,7 +664,7 @@ resource "null_resource" "apply_bgp_peers" {
 resource "null_resource" "apply_caliconodestatus" {
   provisioner "remote-exec" {
     inline = [
-      "kubectl apply -f calico-node-status-${var.cluster_name}.yaml"
+      "kubectl apply -f CalicoNodeStatus-${var.cluster_name}.yaml"
     ]
 
     connection {
@@ -687,7 +687,7 @@ resource "null_resource" "apply_caliconodestatus" {
 resource "null_resource" "apply_ippools" {
   provisioner "remote-exec" {
     inline = [
-      "kubectl apply -f ippool-${var.cluster_name}.yaml"
+      "kubectl apply -f IPPool-${var.cluster_name}.yaml"
     ]
 
     connection {
