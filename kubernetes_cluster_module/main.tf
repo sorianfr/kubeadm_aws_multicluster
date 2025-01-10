@@ -612,9 +612,6 @@
     resource "null_resource" "apply_bgp_conf" {
       provisioner "remote-exec" {
         inline = [
-          # Wait for the BGPConfiguration CRD to be available
-          "echo 'Waiting for BGPConfiguration CRD to be ready...'",
-          "until kubectl get crd bgpconfigurations.crd.projectcalico.org >/dev/null 2>&1; do echo 'Waiting for CRD...'; sleep 5; done",
           # Apply the BGP configuration
           "kubectl apply -f bgp-conf-${var.cluster_name}.yaml"
         ]
@@ -630,10 +627,7 @@
         }
       }
     
-      triggers = {
-        bgp_conf = local_file.bgp_conf.content
-      }
-    
+   
       depends_on = [
         null_resource.kubeadm_init,
         null_resource.copy_files_to_controlplane
@@ -683,9 +677,6 @@ resource "null_resource" "apply_caliconodestatus" {
     }
   }
 
-  triggers = {
-    calico_node_status = local_file.calico_node_status.content
-  }
 
   depends_on = [
     null_resource.apply_bgp_conf
@@ -709,10 +700,7 @@ resource "null_resource" "apply_ippools" {
     }
   }
 
-  triggers = {
-    ippool = local_file.ippool.content
-  }
-
+  
   depends_on = [
     null_resource.apply_bgp_conf
   ]
