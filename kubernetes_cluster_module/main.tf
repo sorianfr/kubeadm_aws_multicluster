@@ -612,6 +612,10 @@
     resource "null_resource" "apply_bgp_conf" {
       provisioner "remote-exec" {
         inline = [
+          # Wait for the BGPConfiguration CRD to be available
+          "echo 'Waiting for BGPConfiguration CRD to be ready...'",
+          "until kubectl get crd bgpconfigurations.projectcalico.org >/dev/null 2>&1; do echo 'Waiting for CRD...'; sleep 5; done",
+          # Apply the BGP configuration
           "kubectl apply -f bgp-conf-${var.cluster_name}.yaml"
         ]
     
