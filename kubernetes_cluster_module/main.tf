@@ -638,7 +638,7 @@
 resource "null_resource" "apply_bgp_peers" {
   provisioner "remote-exec" {
     inline = [
-      for file in local.bgp_peer_files : "kubectl apply -f ${file.filename}"
+      for file in local.bgp_peer_files : "kubectl apply -f ~/bgp_configs/$(basename ${file.filename})"
     ]
 
     connection {
