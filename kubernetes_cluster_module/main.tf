@@ -33,7 +33,7 @@
     # Security Group
     # Security Group allowing all traffic
     resource "aws_security_group" "allow_all_sg" {
-      vpc_id = aws_vpc.main_vpc.id
+      vpc_id = var.vpc_id
     
       ingress {
         from_port   = 0
