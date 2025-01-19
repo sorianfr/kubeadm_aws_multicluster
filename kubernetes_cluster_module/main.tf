@@ -193,7 +193,6 @@
       instance_type               = var.instance_type
       subnet_id                   = aws_subnet.k8s_private_subnet.id
       vpc_security_group_ids      = [aws_security_group.k8s_sg.id]
-      iam_instance_profile        = var.iam_instance_profile
       key_name                    = var.key_name
       private_ip                  = var.controlplane_private_ip
       user_data                   = data.template_file.controlplane_user_data.rendered
@@ -215,7 +214,6 @@
       instance_type               = var.instance_type
       subnet_id                   = aws_subnet.k8s_private_subnet.id
       vpc_security_group_ids      = [aws_security_group.k8s_sg.id]
-      iam_instance_profile        = var.iam_instance_profile
       key_name                    = var.key_name
       private_ip                  = cidrhost(var.private_subnet_cidr_block, 11 + count.index)
       user_data                   = data.template_file.worker_user_data[count.index].rendered
