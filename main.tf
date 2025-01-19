@@ -177,36 +177,6 @@ resource "aws_security_group" "bastion_sg" {
   }
 }
 
-# IAM Role for EC2 instances to access S3 and other resources
-resource "aws_iam_role" "AmazonEBSCSIDriverRole" {
-  name = "AmazonEBSCSIDriverRole"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = "sts:AssumeRole",
-        Effect = "Allow",
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      }
-    ]
-  })
-} 
-  
-# Attach policy to role
-resource "aws_iam_role_policy_attachment" "attach_policy" {
-  role       = aws_iam_role.AmazonEBSCSIDriverRole.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
-}
-# Create instance profile to be attached to ec2 instances. 
-resource "aws_iam_instance_profile" "AmazonEBS_instance_profile" {
-  name = "AmazonEBS_instance_profile"
-  role = aws_iam_role.AmazonEBSCSIDriverRole.name
-}
-
-
 module "kubernetes_clusters" {
   source = "./kubernetes_cluster_module"
   providers = {
@@ -228,7 +198,6 @@ module "kubernetes_clusters" {
   public_subnet_cidr_block = var.public_subnet_cidr_block  # Pass public subnet CIDR block
   private_route_table_id   = aws_route_table.shared_private_rt.id  # Pass shared route table
   key_name                 = aws_key_pair.k8s_key_pair.key_name  # Pass key name
-  iam_instance_profile     = aws_iam_instance_profile.AmazonEBS_instance_profile.name
   region                   = var.region
   encapsulation            = var.encapsulation
   public_sg_id             = aws_security_group.bastion_sg.id
