@@ -88,10 +88,6 @@ variable "private_route_table_id" {
   type        = string
 }
 
-variable "iam_instance_profile" {
-  description = "IAM instance profile for EC2 instances"
-  type        = string
-}
 
 variable "encapsulation" {
   description = "The Encapsulatin method used by Calico"
