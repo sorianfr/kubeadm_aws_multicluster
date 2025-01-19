@@ -582,8 +582,8 @@
 
         # Install k9s
         #"wget https://github.com/derailed/k9s/releases/download/v0.32.7/k9s_linux_amd64.deb && sudo apt install ./k9s_linux_amd64.deb && rm k9s_linux_amd64.deb"
-      #],
-      #[
+      ],
+      [
         for worker_ip in aws_instance.workers[*].private_ip :
         "scp -i my_k8s_key.pem -o StrictHostKeyChecking=no /tmp/join_command.sh ubuntu@${worker_ip}:~/ && ssh -i my_k8s_key.pem -o StrictHostKeyChecking=no ubuntu@${worker_ip} 'chmod +x join_command.sh && sudo ./join_command.sh'"
       ]
