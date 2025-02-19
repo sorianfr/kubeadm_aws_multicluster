@@ -239,3 +239,25 @@ kubectl run tmp-shell --rm -i --tty --image nicolaka/netshoot
 ```bash
 kubectl rollout restart -n kube-system deployment/coredns 
 ```
+
+
+
+
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+
+From bastion to download config files
+```
+scp -i "my_k8s_key.pem" ubuntu@10.0.2.10:.kube/config /home/ubuntu/cluster1_config
+scp -i "my_k8s_key.pem" ubuntu@10.0.3.10:.kube/config /home/ubuntu/cluster2_config
+
+```
+Edit config files as they have the same name
+
+
+export KUBECONFIG=~/cluster1_config:~/cluster2_config
+kubectl config view --merge --flatten > ~/.kube/config
+
+
+
