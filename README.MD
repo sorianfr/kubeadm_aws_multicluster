@@ -252,20 +252,25 @@ From bastion to download config files
 ```
 scp -i "my_k8s_key.pem" ubuntu@10.0.2.10:.kube/config /home/ubuntu/cluster1_config
 scp -i "my_k8s_key.pem" ubuntu@10.0.3.10:.kube/config /home/ubuntu/cluster2_config
-
 ```
 Edit config files as they have the same name
 
-
+```
 export KUBECONFIG=~/cluster1_config:~/cluster2_config
 kubectl config view --merge --flatten > ~/.kube/config
+```
 
 
 to port forward using private ip and port with bastion public ip
 in your local machine:
+```
 ssh -i my_k8s_key.pem -L 8080:10.0.2.10:32510 ubuntu@ec2-54-144-247-55.compute-1.amazonaws.com
+```
+
 in the browser:
+```
 http://localhost:8080
+```
 
 
 ssh -i my_k8s_key.pem -L 8081:10.0.2.10:30287 ubuntu@ec2-54-144-247-55.compute-1.amazonaws.com
